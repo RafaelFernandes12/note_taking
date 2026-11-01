@@ -70,6 +70,11 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<dependency>
+    <groupId>me.friwi</groupId>
+    <artifactId>jcefmaven</artifactId>
+    <version>152.0.6</version>
+</dependency>
 	</dependencies>
 
 	<build>
