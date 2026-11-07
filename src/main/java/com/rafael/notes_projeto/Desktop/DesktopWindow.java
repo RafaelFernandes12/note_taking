@@ -1,5 +1,7 @@
 package com.rafael.notes_projeto.Desktop;
 
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -55,6 +57,11 @@ class DesktopWindow {
     // abre o front já buildado que o próprio Spring serve.
     String url = env.getProperty("desktop.frontend-url", "http://127.0.0.1:" + port);
     CefBrowser browser = client.createBrowser(url, offscreen, false);
+    if (offscreen) {
+      // natural-scroll: conteúdo acompanha os dedos (como no touchpad do sistema).
+      int direction = env.getProperty("desktop.natural-scroll", Boolean.class, true) ? -1 : 1;
+      fixScroll(browser.getUIComponent(), env.getProperty("desktop.scroll-factor", Integer.class, 30), direction);
+    }
 
     SwingUtilities.invokeLater(() -> {
       JFrame f = new JFrame("Notes");
@@ -70,6 +77,30 @@ class DesktopWindow {
         }
       });
       f.setVisible(true);
+    });
+  }
+
+  /**
+   * No modo offscreen o JCEF repassa ao Chromium o {@code getUnitsToScroll()} do
+   * Swing (normalmente 3) como se fossem pixels, então cada passo da roda ou do
+   * touchpad rola só 3px. Aqui multiplicamos o evento antes de entregá-lo ao JCEF.
+   * Pelo XWayland o Java também não recebe a "rolagem natural" do sistema, então
+   * {@code direction = -1} inverte o sentido.
+   */
+  private static void fixScroll(java.awt.Component ui, int factor, int direction) {
+    MouseWheelListener[] jcefListeners = ui.getMouseWheelListeners();
+    for (MouseWheelListener l : jcefListeners) {
+      ui.removeMouseWheelListener(l);
+    }
+    ui.addMouseWheelListener(e -> {
+      MouseWheelEvent scaled = new MouseWheelEvent(e.getComponent(), e.getID(), e.getWhen(),
+          e.getModifiersEx(), e.getX(), e.getY(), e.getXOnScreen(), e.getYOnScreen(),
+          e.getClickCount(), e.isPopupTrigger(), e.getScrollType(),
+          e.getScrollAmount() * factor, e.getWheelRotation() * direction,
+          e.getPreciseWheelRotation() * direction);
+      for (MouseWheelListener l : jcefListeners) {
+        l.mouseWheelMoved(scaled);
+      }
     });
   }
 }
