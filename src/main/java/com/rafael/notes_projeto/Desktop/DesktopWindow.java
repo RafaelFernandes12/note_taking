@@ -44,12 +44,17 @@ class DesktopWindow {
     }
     // Cache próprio do app, em vez do ~/.config/cef_user_data compartilhado.
     builder.getCefSettings().root_cache_path = new File("jcef-cache").getAbsolutePath();
+    // Modo offscreen (OSR): o Chromium desenha dentro de um componente Swing e o
+    // Java repassa mouse/teclado. No modo janela nativa o Chromium cria uma janela
+    // X11 filha que, sob Wayland (XWayland), não recebe cliques.
+    boolean offscreen = env.getProperty("desktop.offscreen", Boolean.class, true);
+    builder.getCefSettings().windowless_rendering_enabled = offscreen;
     CefApp cef = builder.build();
     CefClient client = cef.createClient();
     // Em dev (profile "dev") a janela abre o Vite, com hot reload; sem ele,
     // abre o front já buildado que o próprio Spring serve.
     String url = env.getProperty("desktop.frontend-url", "http://127.0.0.1:" + port);
-    CefBrowser browser = client.createBrowser(url, false, false);
+    CefBrowser browser = client.createBrowser(url, offscreen, false);
 
     SwingUtilities.invokeLater(() -> {
       JFrame f = new JFrame("Notes");
