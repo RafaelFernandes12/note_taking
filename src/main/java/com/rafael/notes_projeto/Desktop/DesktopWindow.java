@@ -36,6 +36,12 @@ class DesktopWindow {
     builder.addJcefArgs("--ozone-platform=x11");
     // Sem isso o Chromium abre a janela de "primeiro uso" (termos de serviço).
     builder.addJcefArgs("--no-first-run", "--no-default-browser-check");
+    // Só para depurar: -Dspring-boot.run.arguments=--desktop.debug-port=9222
+    // (expõe o navegador a qualquer processo local, não deixe ligado).
+    String debugPort = env.getProperty("desktop.debug-port");
+    if (debugPort != null) {
+      builder.addJcefArgs("--remote-debugging-port=" + debugPort);
+    }
     // Cache próprio do app, em vez do ~/.config/cef_user_data compartilhado.
     builder.getCefSettings().root_cache_path = new File("jcef-cache").getAbsolutePath();
     CefApp cef = builder.build();
