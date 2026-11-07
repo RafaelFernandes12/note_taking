@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.rafael.notes_projeto.files.model.Files;
 import com.rafael.notes_projeto.tags.model.Tags;
 
 @Entity
@@ -59,6 +61,10 @@ public class Pages {
   @JsonIgnore
   @Builder.Default
   private Set<Pages> links = new HashSet<>();
+
+  @OneToMany(mappedBy = "page")
+  @Builder.Default
+  private Set<Files> files = new HashSet<>();
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
