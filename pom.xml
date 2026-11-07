@@ -82,6 +82,11 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<!-- `./mvnw spring-boot:run` já sobe em dev: a janela abre o Vite
+					     (hot reload). O jar final continua servindo o front buildado. -->
+					<profiles>dev</profiles>
+				</configuration>
 			</plugin>
 			<!-- Copia o build do front (notes_web/dist) para o classpath, onde o
 			     Spring o serve como conteúdo estático para a janela do JCEF. -->

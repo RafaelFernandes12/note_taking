@@ -40,7 +40,10 @@ class DesktopWindow {
     builder.getCefSettings().root_cache_path = new File("jcef-cache").getAbsolutePath();
     CefApp cef = builder.build();
     CefClient client = cef.createClient();
-    CefBrowser browser = client.createBrowser("http://127.0.0.1:" + port, false, false);
+    // Em dev (profile "dev") a janela abre o Vite, com hot reload; sem ele,
+    // abre o front já buildado que o próprio Spring serve.
+    String url = env.getProperty("desktop.frontend-url", "http://127.0.0.1:" + port);
+    CefBrowser browser = client.createBrowser(url, false, false);
 
     SwingUtilities.invokeLater(() -> {
       JFrame f = new JFrame("Notes");
